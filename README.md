@@ -62,7 +62,8 @@ If an earlier pairing exists after a firmware protocol change, forget
 
 ## Controls
 
-- **MODEL** opens Codex's model picker, moves to the next model, and confirms it.
+- Press **MODEL** once to open Codex's model picker. Use the **THINKING** slider
+  to highlight a model, then press **MODEL** again to confirm it.
 - **THINKING** maps Low, Medium, High, XHigh, Max, and Ultra to the
   Codex Micro reasoning encoder. The first touch synchronizes at Low before
   moving to the chosen level.

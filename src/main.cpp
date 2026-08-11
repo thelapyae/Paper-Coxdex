@@ -47,6 +47,8 @@ constexpr const char* kThinkingLabels[kThinkingLevelCount] = {
 };
 int thinkingLevel = 2;
 bool thinkingSynced = false;
+bool modelPickerOpen = false;
+int modelPickerSliderLevel = 2;
 
 bool imuAvailable = false;
 uint8_t currentRotation = 1;
@@ -307,13 +309,17 @@ void drawAction(size_t index) {
   const uint16_t text = pressed ? TFT_WHITE : TFT_BLACK;
   M5.Display.setTextColor(text, fill);
   M5.Display.setTextDatum(middle_center);
+  const char* glyph =
+      index == 0 && modelPickerOpen ? "OK" : codex::kActionGlyphs[index];
+  const char* label =
+      index == 0 && modelPickerOpen ? "SELECT" : codex::kActionLabels[index];
   M5.Display.setTextSize(index == 0 ? 3 : (index == 4 ? 4 : 5));
-  M5.Display.drawString(codex::kActionGlyphs[index],
+  M5.Display.drawString(glyph,
                         r.x + r.w / 2 + shift,
                         r.y + (index == 0 ? r.h / 2 - 12 : r.h * 35 / 100) +
                             shift);
   M5.Display.setTextSize(2);
-  M5.Display.drawString(codex::kActionLabels[index],
+  M5.Display.drawString(label,
                         r.x + r.w / 2 + shift,
                         r.y + (index == 0 ? r.h / 2 + 22 : r.h * 70 / 100) +
                             shift);
@@ -340,10 +346,13 @@ void drawThinkingSlider() {
   M5.Display.setTextColor(text, fill);
   M5.Display.setTextDatum(top_left);
   M5.Display.setTextSize(2);
-  M5.Display.drawString("THINKING", r.x + 14, r.y + 10);
+  M5.Display.drawString(modelPickerOpen ? "CHOOSE MODEL" : "THINKING",
+                        r.x + 14, r.y + 10);
   M5.Display.setTextDatum(top_right);
-  M5.Display.drawString(thinkingSynced ? kThinkingLabels[thinkingLevel]
-                                      : "TOUCH TO SET",
+  M5.Display.drawString(modelPickerOpen
+                            ? "PRESS MODEL"
+                            : (thinkingSynced ? kThinkingLabels[thinkingLevel]
+                                              : "TOUCH TO SET"),
                         r.x + r.w - 14, r.y + 10);
 
   const int trackLeft = r.x + 18;
@@ -353,7 +362,9 @@ void drawThinkingSlider() {
   for (int i = 0; i < kThinkingLevelCount; ++i) {
     const int x = trackLeft +
                   i * (trackRight - trackLeft) / (kThinkingLevelCount - 1);
-    const bool selected = thinkingSynced && i <= thinkingLevel;
+    const bool selected = modelPickerOpen
+                              ? i <= modelPickerSliderLevel
+                              : thinkingSynced && i <= thinkingLevel;
     M5.Display.fillCircle(x, trackY, selected ? 8 : 5, text);
     if (!selected) M5.Display.fillCircle(x, trackY, 2, fill);
   }
@@ -474,14 +485,17 @@ void tapKeyboardKey(uint8_t modifier, uint8_t key, int pauseMs = 70) {
 
 void sendModelPickerShortcut(int action) {
   if (action != 1) return;
-  Serial.println("MODEL: open picker and choose next");
-  // Open Codex's model picker, move from the current model to the next model,
-  // and confirm it. One touchscreen press therefore changes the model instead
-  // of leaving the picker open.
-  tapKeyboardKey(0x03, 0x10, 90);  // Left Control + Shift + M.
-  delay(260);
-  tapKeyboardKey(0x00, 0x51, 70);  // Down Arrow.
-  tapKeyboardKey(0x00, 0x28, 70);  // Enter.
+  if (!modelPickerOpen) {
+    Serial.println("MODEL: open picker");
+    tapKeyboardKey(0x03, 0x10, 90);  // Left Control + Shift + M.
+    modelPickerOpen = true;
+    modelPickerSliderLevel = kThinkingLevelCount / 2;
+  } else {
+    Serial.println("MODEL: confirm highlighted model");
+    tapKeyboardKey(0x00, 0x28, 90);  // Enter.
+    modelPickerOpen = false;
+  }
+  requestScreenDraw();
 }
 
 void sendThinkingStep(bool increase) {
@@ -497,6 +511,15 @@ void setThinkingLevelFromTouch(int16_t x) {
   int target = (x - trackLeft) * kThinkingLevelCount /
                max(1, trackRight - trackLeft + 1);
   target = constrain(target, 0, kThinkingLevelCount - 1);
+
+  if (modelPickerOpen) {
+    const int delta = target - modelPickerSliderLevel;
+    for (int i = 0; i < abs(delta); ++i) sendThinkingStep(delta > 0);
+    modelPickerSliderLevel = target;
+    requestScreenDraw();
+    return;
+  }
+
   if (thinkingSynced && target == thinkingLevel) return;
 
   if (!thinkingSynced) {
