@@ -1,6 +1,6 @@
-# Paper Micro
+# Paper Coxdex
 
-Paper Micro turns an M5Stack PaperS3 into a Bluetooth Codex Micro-compatible touch
+Paper Coxdex turns an M5Stack PaperS3 into a Bluetooth Codex Micro-compatible touch
 controller. It presents six agent slots, six command keys, live agent state on
 the e-ink display, and buzzer alerts for completion, input requests, and errors.
 
@@ -17,6 +17,10 @@ Codex Micro, M5Stack, or Work Louder firmware.
 - Battery and connection status in the top bar
 - High-contrast E-Ink UI inspired by Codex Micro's raised keycap layout
 - Large agent numbers, state symbols, thick borders, and a wide Voice key
+- Full-screen Accept/Reject decision popup when Codex needs input
+- Model cycle button using Codex's native model picker and keyboard controls
+- Six-notch Thinking slider backed by Codex Micro encoder events
+- Automatic portrait and landscape layouts using the PaperS3 IMU
 
 The PaperS3 has no physical keys, rotary encoder, RGB LEDs, or joystick. This
 version uses the touch display for keys and maps Codex's RGB state colors into
@@ -55,6 +59,20 @@ pio run -e papers3
 
 If an earlier pairing exists after a firmware protocol change, forget
 **Paper Micro** in Bluetooth settings and pair it again.
+
+## Controls
+
+- **MODEL** opens Codex's model picker, moves to the next model, and confirms it.
+- **THINKING** maps Low, Medium, High, XHigh, Max, and Ultra to the
+  Codex Micro reasoning encoder. The first touch synchronizes at Low before
+  moving to the chosen level.
+- **ACCEPT / REJECT** remain available as normal keys and become a large
+  decision popup whenever an agent enters the Needs Input state.
+- **NEW, VOICE, CODEX** start a new chat, control push-to-talk, and submit.
+- Rotate the device and hold it steady briefly to switch through all four
+  orientations: portrait, landscape, reverse portrait, and reverse landscape.
+  Orientation changes use a full E-Ink refresh to prevent stale rotated pixels.
+  If the device is flat on a desk, it keeps the last orientation.
 
 ## Safety note
 

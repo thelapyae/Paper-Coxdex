@@ -10,6 +10,7 @@ constexpr uint16_t kProductId = 0x8360;
 // macOS interprets the Bluetooth PnP characteristic as little-endian.
 constexpr uint16_t kBlePnpVendorId = 0x3A30;
 constexpr uint16_t kBlePnpProductId = 0x6083;
+constexpr uint8_t kKeyboardReportId = 1;
 constexpr uint8_t kReportId = 6;
 constexpr uint8_t kRpcChannel = 2;
 constexpr size_t kReportPayloadSize = 63;
@@ -28,20 +29,47 @@ constexpr const char* kActionKeys[kAgentCount] = {
 };
 
 constexpr const char* kActionLabels[kAgentCount] = {
-    "FAST", "ACCEPT", "REJECT", "NEW", "VOICE", "CODEX",
+    "MODEL", "ACCEPT", "REJECT", "NEW", "VOICE", "CODEX",
 };
 
 constexpr const char* kActionGlyphs[kAgentCount] = {
-    ">>", "OK", "X", "+", "MIC", "C",
+    "AI", "OK", "X", "+", "MIC", "C",
 };
 
 constexpr const char* kActionHints[kAgentCount] = {
-    "REASONING", "APPROVE", "DECLINE", "NEW CHAT", "HOLD TO TALK", "OPEN",
+    "CHOOSE", "APPROVE", "DECLINE", "NEW CHAT", "HOLD TO TALK", "SEND",
 };
 
 // Vendor-defined HID collection, report ID 6, 63 bytes in each direction.
 // macOS exposes this as usage page 0xFF00, which Codex desktop watches.
 constexpr uint8_t kHidReportMap[] = {
+    // Standard keyboard collection. Used only for Codex's native model-picker
+    // shortcut (Ctrl+Shift+M); normal controls remain on the vendor channel.
+    0x05, 0x01,                    // Usage Page (Generic Desktop)
+    0x09, 0x06,                    // Usage (Keyboard)
+    0xA1, 0x01,                    // Collection (Application)
+    0x85, kKeyboardReportId,       //   Report ID (1)
+    0x05, 0x07,                    //   Usage Page (Keyboard)
+    0x19, 0xE0,                    //   Usage Minimum (Left Control)
+    0x29, 0xE7,                    //   Usage Maximum (Right GUI)
+    0x15, 0x00,                    //   Logical Minimum (0)
+    0x25, 0x01,                    //   Logical Maximum (1)
+    0x75, 0x01,                    //   Report Size (1)
+    0x95, 0x08,                    //   Report Count (8)
+    0x81, 0x02,                    //   Input (Data, Variable, Absolute)
+    0x95, 0x01,                    //   Report Count (1)
+    0x75, 0x08,                    //   Report Size (8)
+    0x81, 0x01,                    //   Input (Constant)
+    0x95, 0x06,                    //   Report Count (6)
+    0x75, 0x08,                    //   Report Size (8)
+    0x15, 0x00,                    //   Logical Minimum (0)
+    0x25, 0x65,                    //   Logical Maximum (101)
+    0x05, 0x07,                    //   Usage Page (Keyboard)
+    0x19, 0x00,                    //   Usage Minimum (Reserved)
+    0x29, 0x65,                    //   Usage Maximum (Keyboard Application)
+    0x81, 0x00,                    //   Input (Data, Array)
+    0xC0,                          // End Collection
+
     0x06, 0x00, 0xFF,        // Usage Page (Vendor Defined 0xFF00)
     0x09, 0x01,              // Usage (1)
     0xA1, 0x01,              // Collection (Application)
