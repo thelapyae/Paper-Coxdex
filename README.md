@@ -14,6 +14,7 @@ Codex Micro, M5Stack, or Work Louder firmware.
 - Default command keys: Fast, Approve, Reject, Split, Voice, and Codex
 - E-ink agent states: Idle, Thinking, Complete, Needs Input, and Error
 - Different buzzer patterns for Complete, Needs Input, and Error
+- Short mechanical-style click feedback for touch controls
 - Battery and connection status in the top bar
 - High-contrast E-Ink UI inspired by Codex Micro's raised keycap layout
 - Large agent numbers, state symbols, thick borders, and a wide Voice key

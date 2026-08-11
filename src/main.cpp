@@ -79,6 +79,13 @@ void requestScreenDraw() {
 
 void playNotification(codex::AgentState state) {
   switch (state) {
+    case codex::AgentState::active:
+      // A short high/low transient feels closer to a mechanical key click
+      // than the previous single 35 ms confirmation beep.
+      M5.Speaker.tone(4200, 7);
+      delay(8);
+      M5.Speaker.tone(1800, 5);
+      break;
     case codex::AgentState::unread:
       M5.Speaker.tone(1800, 90);
       delay(120);
